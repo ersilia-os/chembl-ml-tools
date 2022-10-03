@@ -102,15 +102,17 @@ ORDER BY chembl_id
             df_negatives = self.df_all_molecules
             
         num_negatives = len(df_negatives)
-        print(f'Number of molecules in Chembl database: {len(self.df_all_molecules)}')
-        print(f'Number of available negative molecules '
-        print(f'(after substracting the provided positive cases): {num_negatives}')
-        print(f'Number of requested negative molecules: {num_molecules}')
+        print(f'Number of molecules in Chembl database: {len(self.df_all_molecules)}\n'
+              f'Number of available negative molecules '
+              f'(after substracting the provided positive cases): {num_negatives}\n'
+              f'Number of requested negative molecules: {num_molecules}'
+              )
             
         if num_molecules > num_negatives:
             print(f'Warning: The number of requested molecules ({num_molecules}) is higher than the number '
                   f'of available negative cases ({num_negatives}). A dataframe of size {num_negatives} '
-                  f'will be returned.')
+                  f'will be returned.'
+                  )
             return df_negatives.reset_index()  # Convert index into column
         else:
             df_negatives_sample = df_negatives.sample(n=num_molecules)
