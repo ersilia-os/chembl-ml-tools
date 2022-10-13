@@ -41,7 +41,9 @@ SELECT
   act.standard_type,
   act.standard_value,
   act.standard_units,
+  act.standard_relation,
   act.pchembl_value,
+  act.activity_comment,
   td.chembl_id AS target_chembl_id,
   td.target_type,
   td.organism AS target_organism,
@@ -62,7 +64,7 @@ WHERE UPPER(td.organism) LIKE '%{organism_contains.upper()}%'
 """
     )
     
-    # Run query second step
+    # Run query second step (consolidate duplicates)
     cursor.execute(
 """
 CREATE TEMPORARY TABLE tmp_activity_protein AS
@@ -78,7 +80,9 @@ SELECT
   standard_type,
   standard_value,
   standard_units,
+  standard_relation,
   pchembl_value,
+  max(activity_comment) AS activity_comment,
   target_chembl_id,
   max(target_type) AS target_type,
   max(target_organism) AS target_organism,
@@ -101,6 +105,7 @@ GROUP BY
   standard_type,
   standard_value,
   standard_units,
+  standard_relation,
   pchembl_value
 """
     )
