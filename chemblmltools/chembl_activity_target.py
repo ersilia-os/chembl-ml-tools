@@ -3,9 +3,10 @@
 import psycopg2
 import pandas as pd
 import pandas.io.sql as sqlio
-
+from rdkit import Chem
 
 def chembl_activity_target(db_user, db_password, organism_contains
+                          ,max_heavy_atoms=None
                           ,db_name='chembl_31', db_host='localhost', db_port=5432):
     
     # Connect to chembl database
@@ -114,17 +115,25 @@ GROUP BY
     
     # Count rows
     cursor.execute("SELECT count(*) FROM tmp_activity_protein")
-    print('Count:', cursor.fetchone())
+    print(f'{cursor.fetchone()[0]} rows extracted from Chembl:')
     
-    # NOTE: Selected rows are limited in case there are too many - pending to give a warning if not all rows are shown
+    # NOTE: Selected rows are limited in case there are too many
+    # Pending to give a warning if not all rows are shown
     sql = "SELECT * FROM tmp_activity_protein limit 500000"
     df = sqlio.read_sql_query(sql, conn)
-    print('Resulting dataframe shape:', df.shape)
-    print()
+
+    conn.close()  # Close database connection
+
+    if max_heavy_atoms is not None:
+      print(f'{len(df)} cases selected before filtering for NumHeavyAtoms <= {max_heavy_atoms}')
+      # Filter out molecules larger than max_heavy_atoms
+      molecules = df.canonical_smiles.apply(Chem.MolFromSmiles)
+      heavy_atoms = molecules.apply(lambda x: x.GetNumHeavyAtoms())
+      df = df[heavy_atoms <= max_heavy_atoms]
+
+    print(f'{len(df)} cases in resulting dataset.', )
     print('Selected organisms:')
     print(df.target_organism.value_counts())
     
-    # Close database connection
-    conn.close()
     
-    return df
+    return df.copy()

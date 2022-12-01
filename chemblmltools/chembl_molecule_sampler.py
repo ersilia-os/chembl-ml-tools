@@ -2,6 +2,7 @@ import psycopg2
 import pandas as pd
 import pandas.io.sql as sqlio
 import os.path
+from rdkit import Chem
 
 
 class ChemblMoleculeSampler:
@@ -10,14 +11,17 @@ class ChemblMoleculeSampler:
     # Name of the file that contains the full list of molecules downloaded from Chembl
     FILENAME_ALL_MOLECULES = 'chembl_all_molecules.csv'
 
-    def __init__(self, data_path, db_user, db_password
-                , db_name='chembl_31', db_host='localhost', db_port=5432):
+    def __init__(self, data_path, db_user, db_password,
+                 db_name='chembl_31', db_host='localhost', db_port=5432,
+                 max_heavy_atoms=None):
         """
         Load the list of all molecules into dataframe df_all_molecules
         
         Parameters:
             data_path (str): A valid path where we store the csv file with the full list of molecules.
             db_user, db_password, db_name, db_host, db_port: Parameters to connect to the Chembl database
+            max_heavy_atoms (int, optional): Select only molecules with at most this
+                number of non-hydrogen atoms.
         """
         
         self.data_path = data_path
@@ -35,8 +39,24 @@ class ChemblMoleculeSampler:
             print(f'List of molecules downloaded into file {self.FILENAME_ALL_MOLECULES}. Table shape (rows,columns): {df.shape}')
 
         # Load the list of all molecules from csv into a dataframe
-        self.df_all_molecules = pd.read_csv(file_with_path, index_col=0)
-            
+        df_all_molecules1 = pd.read_csv(file_with_path, index_col=0)
+
+        if max_heavy_atoms is not None:
+            # For performance reasons, we limit the number of molecules
+            MAX_MOLECULES_TO_COUNT_ATOMS = 100000
+            if len(df_all_molecules1) > MAX_MOLECULES_TO_COUNT_ATOMS:
+                df_all_molecules1 = df_all_molecules1.sample(n=MAX_MOLECULES_TO_COUNT_ATOMS)
+
+            # Filter out molecules larger than max_heavy_atoms
+            molecules = df_all_molecules1.canonical_smiles.apply(Chem.MolFromSmiles)
+            heavy_atoms = molecules.apply(lambda x: x.GetNumHeavyAtoms())
+            self.df_all_molecules = df_all_molecules1[heavy_atoms <= max_heavy_atoms]
+            print(f'{len(self.df_all_molecules)} candidate molecules available after'
+                  f' filtering for NumHeavyAtoms <= {max_heavy_atoms}')
+        else:
+            self.df_all_molecules = df_all_molecules1
+            print(f'{len(self.df_all_molecules)} candidate molecules available')
+
     def download_all_molecules(self, db_user, db_password, db_name, db_host, db_port):
         """
         Download all molecules from the Chembl database and store them in a csv file
@@ -95,26 +115,25 @@ ORDER BY chembl_id
             df_negatives_sample (DataFrame) Dataframe with sample of negative cases
         """
         
+        print(f'{len(self.df_all_molecules)} total molecules available')
+
         # If dataframe with positive cases is provided, exclude those cases previous to the sampling
         if list_positive_molecules:
             df_negatives = self.df_all_molecules[~self.df_all_molecules.index.isin(list_positive_molecules)]
+            print(f'{len(df_negatives)} negative molecules available'
+                f' (after substracting the provided positive cases)')
         else:
             df_negatives = self.df_all_molecules
-            
+
         num_negatives = len(df_negatives)
-        print(f'Number of molecules in Chembl database: {len(self.df_all_molecules)}\n'
-              f'Number of available negative molecules '
-              f'(after substracting the provided positive cases): {num_negatives}\n'
-              f'Number of requested negative molecules: {num_molecules}'
-              )
-            
-        if num_molecules > num_negatives:
+        if num_molecules > num_negatives:  # Fewer available than requested: provide all available
             print(f'Warning: The number of requested molecules ({num_molecules}) is higher than the number '
-                  f'of available negative cases ({num_negatives}). A dataframe of size {num_negatives} '
+                  f'of available negative molecules ({num_negatives}). A dataframe of size {num_negatives} '
                   f'will be returned.'
                   )
             return df_negatives.reset_index()  # Convert index into column
-        else:
+        else:  # More available than requested: Random sample
             df_negatives_sample = df_negatives.sample(n=num_molecules)
+            print(f'{num_molecules} molecules provided')
             return df_negatives_sample.reset_index()  # Convert index into column
         
