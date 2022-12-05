@@ -49,13 +49,27 @@ class ChemblMoleculeSampler:
 
             # Filter out molecules larger than max_heavy_atoms
             molecules = df_all_molecules1.canonical_smiles.apply(Chem.MolFromSmiles)
-            heavy_atoms = molecules.apply(lambda x: x.GetNumHeavyAtoms())
+            heavy_atoms = molecules.apply(lambda x: self.GetNumHeavyAtoms_prevent_exception(x))
             self.df_all_molecules = df_all_molecules1[heavy_atoms <= max_heavy_atoms]
             print(f'{len(self.df_all_molecules)} candidate molecules available after'
                   f' filtering for NumHeavyAtoms <= {max_heavy_atoms}')
         else:
             self.df_all_molecules = df_all_molecules1
             print(f'{len(self.df_all_molecules)} candidate molecules available')
+
+    def GetNumHeavyAtoms_prevent_exception(self, x):
+        """Encapsulate method GetNumHeavyAtoms to return 1e10 in case of exception
+
+        Background: Occasionally the method GetNumHeavyAtoms fails for specific
+        molecules with the error 'Can't kekulize mol'.
+        In this case we do not want the program to fail, just report a very
+        large value for the molecule so it will not pass the max_heavy_atoms filter.
+        """
+        try:
+            return x.GetNumHeavyAtoms()
+        except:
+            return 1e10
+
 
     def download_all_molecules(self, db_user, db_password, db_name, db_host, db_port):
         """
