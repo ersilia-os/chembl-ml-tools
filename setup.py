@@ -11,6 +11,7 @@ setup(name='chemblmltools',
       python_requires='>=3.7',
       install_requires=[
         'pandas',
+        'rdkit',
         'psycopg2-binary'
       ],
       packages=find_packages(exclude=("utilities")),
