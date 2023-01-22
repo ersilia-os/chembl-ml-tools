@@ -46,7 +46,7 @@ chembl_31=# \q
 
 So far the database is installed and it works with user postgres. For security, we prefer to create a specific DB user
 with limited rights, called "chembl_user", to use in our programs. The password for this DB user
-will be "aaa" (this is hard-coded in the data extraction program).
+will be "aaa".
 
 7. Create a specific user for querying this database
 ```
