@@ -7,7 +7,7 @@ from rdkit import Chem
 
 def chembl_activity_target(db_user, db_password, organism_contains
                           ,max_heavy_atoms=None
-                          ,db_name='chembl_31', db_host='localhost', db_port=5432):
+                          ,db_name='chembl_33', db_host='localhost', db_port=5432):
     
     # Connect to chembl database
     conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, host=db_host, port=db_port)
