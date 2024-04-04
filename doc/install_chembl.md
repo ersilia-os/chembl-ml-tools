@@ -42,6 +42,16 @@ $ sudo -u postgres pg_restore --no-owner --verbose -U postgres -d chembl_33 chem
 ```
 $ sudo -u postgres psql chembl_33
 chembl_33=# select * from assay_type;
+ assay_type |   assay_desc    
+------------+-----------------
+ A          | ADME
+ B          | Binding
+ F          | Functional
+ P          | Physicochemical
+ T          | Toxicity
+ U          | Unassigned
+(6 rows)
+
 chembl_33=# \q
 ```
 
@@ -76,7 +86,7 @@ Type "help" for help.
 chembl_33=> select count(*) from assays;
   count
 ---------
- 1498681
+ 1610596
 (1 row)
 chembl_33=> \q
 ```
