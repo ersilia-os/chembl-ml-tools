@@ -21,27 +21,28 @@ The user "postgres" is created automatically and is the DB administrator. To do 
 3. Create database for ChEMBL (make sure to include the final semicolon in all SQL commands)
 ```
 $ sudo -u postgres psql
-postgres=# create database chembl_31;
+postgres=# create database chembl_33;
 postgres=# \q
 ```
+At that step, you might encounter issues due to the permissions in your user. Please look at this [thread](https://dba.stackexchange.com/questions/54242/cannot-start-psql-with-user-postgres-could-not-change-directory-to-home-user) or this [thread](https://www.reddit.com/r/PostgreSQL/comments/vc2nbw/ubuntukubuntu_2204_permission_denied_how_to_solve/) to learn more and solve them.
 
 4. Download the ChEMBL data in postgres format
 From this site: https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/
-Download the file: `chembl_31_postgresql.tar.gz`
-Decompress it to get the file `chembl_31_postgresql.dmp`
+Download the file: `chembl_33_postgresql.tar.gz`
+Decompress it to get the file `chembl_33_postgresql.dmp`
 
 5. Load database contents using the downloaded file. NOTE: The database requires about **23 GB of disk space**.
 
 This step will take time: about 15-25 minutes on an SSD disk, considerably longer on a traditional HDD disk.
 ```
-$ sudo -u postgres pg_restore --no-owner --verbose -U postgres -d chembl_31 chembl_31_postgresql.dmp
+$ sudo -u postgres pg_restore --no-owner --verbose -U postgres -d chembl_33 chembl_33_postgresql.dmp
 ```
 
 6. Test: Enter the database for querying. Run a test query. You should get the list of assay types.
 ```
-$ sudo -u postgres psql chembl_31
-chembl_31=# select * from assay_type;
-chembl_31=# \q
+$ sudo -u postgres psql chembl_33
+chembl_33=# select * from assay_type;
+chembl_33=# \q
 ```
 
 So far the database is installed and it works with user postgres. For security, we prefer to create a specific DB user
@@ -59,25 +60,25 @@ Shall the new role be allowed to create databases? (y/n) n
 Shall the new role be allowed to create more new roles? (y/n) n
 ```
 
-8. Grant access to the chembl_31 tables to user chembl_user
+8. Grant access to the chembl_33 tables to user chembl_user
 ```
-$ sudo -u postgres psql chembl_31
-chembl_31=# GRANT SELECT ON ALL TABLES IN SCHEMA public TO chembl_user;
+$ sudo -u postgres psql chembl_33
+chembl_33=# GRANT SELECT ON ALL TABLES IN SCHEMA public TO chembl_user;
 ```
 
 9. Test: Connect to database as user chembl_user. Count the number of assays.
 ```
-$ psql -h localhost -p 5432 -U chembl_user chembl_31
+$ psql -h localhost -p 5432 -U chembl_user chembl_33
 Password for user chembl_user: (use the password you created before)
 psql (12.13 (Ubuntu 12.13-0ubuntu0.20.04.1))
 SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
 Type "help" for help.
-chembl_31=> select count(*) from assays;
+chembl_33=> select count(*) from assays;
   count
 ---------
  1498681
 (1 row)
-chembl_31=> \q
+chembl_33=> \q
 ```
 
 **DONE!**
