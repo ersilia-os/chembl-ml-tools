@@ -13,9 +13,11 @@ This package provides:
 These tools require access to a postgres database server containing the ChEMBL database. You may install ChEMBL in your own computer 
 by following these instructions: [How to install ChEMBL](doc/install_chembl.md)
 
+This package is a general ChEMBL access prepared to work within the [Antimicrobial ML tasks package](https://github.com/ersilia-os/antimicrobial-ml-tasks). If you want to use it for other applications please make the necessary modifications.
+
 ## Installation
 
-To install the package:
+To install the package in a conda environment, please run:
 ```
 pip install git+https://github.com/ersilia-os/chembl_ml_tools.git
 ```

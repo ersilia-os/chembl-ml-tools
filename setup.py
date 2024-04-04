@@ -1,24 +1,24 @@
 from setuptools import setup, find_packages
 
 setup(name='chemblmltools',
-      version='0.0.1',
+      version='0.0.2',
       description='Tools for obtaining Chembl data for machine learning models',
       long_description=open('README.md').read().strip(),
-      author='Marcos de la Torre',
-      author_email='marcostorrework@gmail.com',
+      author="Ersilia Open Source Initiative",
+      author_email="hello@ersilia.io",
       url='https://github.com/ersilia-os/chembl_ml_tools',
-      license='MIT',
-      python_requires='>=3.7',
+      license='GPLv3',
+      python_requires='>=3.10',
       install_requires=[
-        'pandas',
-        'rdkit',
-        'psycopg2-binary'
+        'pandas==2.2.1',
+        'rdkit==2023.9.5',
+        'psycopg2-binary==2.9.9'
       ],
       packages=find_packages(exclude=("utilities")),
       keywords='drug-discovery machine-learning ersilia chembl',
       classifiers=[
-          "Programming Language :: Python :: 3.7",
-          "License :: OSI Approved :: MIT License",
+          "Programming Language :: Python :: 3.10",
+          "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
           "Operating System :: OS Independent",
           "Topic :: Scientific/Engineering :: Artificial Intelligence",
       ],
