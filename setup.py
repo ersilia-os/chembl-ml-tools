@@ -6,13 +6,13 @@ setup(name='chemblmltools',
       long_description=open('README.md').read().strip(),
       author="Ersilia Open Source Initiative",
       author_email="hello@ersilia.io",
-      url='https://github.com/ersilia-os/chembl_ml_tools',
+      url='https://github.com/ersilia-os/chembl-ml-tools',
       license='GPLv3',
-      python_requires='>=3.10',
+      python_requires='>=3.7',
       install_requires=[
-        'pandas==2.2.1',
-        'rdkit==2023.9.5',
-        'psycopg2-binary==2.9.9'
+        'pandas',
+        'rdkit',
+        'psycopg2-binary'
       ],
       packages=find_packages(exclude=("utilities")),
       keywords='drug-discovery machine-learning ersilia chembl',
